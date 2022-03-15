@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from csv import DictWriter
 
 import olympe
 from olympe.messages.ardrone3.Piloting import TakeOff, Landing
@@ -39,7 +40,8 @@ olympe.log.update_config({"loggers": {"olympe": {"level": "WARNING"}}})
 
 DRONE_IP = "192.168.53.1"
 DRONE_RTSP_PORT = os.environ.get("DRONE_RTSP_PORT")
-f = open('data.csv', 'w')
+headersCSV = ['Longitude','Latitude']  
+dict={'Longitude':'','Latitude':''}
 
 class FlightListener(olympe.EventListener):
 
@@ -56,11 +58,22 @@ class FlightListener(olympe.EventListener):
                 **event.args
             )
         )
+        dict["Latitude"] = str(event.args['latitude'])
+        dict["Longitude"] = str(event.args['longitude'])
+        
         print(time.time())
-        f.write(event.args['latitude'])
-        f.write(",")
-        f.write(event.args['longitude'])
-        f.write("\n")
+        with open('CSVFILE.csv', 'a', newline='') as f_object:
+            dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
+            # Pass the data in the dictionary as an argument into the writerow() function
+            dictwriter_object.writerow(dict)
+            # Close the file object
+            f_object.close()
+        # f = open('data.csv', 'w')
+        # f.write(str(event.args['latitude']))
+        # f.write(",")
+        # f.write(str(event.args['longitude']))
+        # f.write("\n")
+        # f.close()
 
     @olympe.listen_event(SpeedChanged(_policy="wait"))
     def onSpeedChanged(self, event, scheduler):
