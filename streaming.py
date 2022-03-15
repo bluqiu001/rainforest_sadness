@@ -63,7 +63,6 @@ with FlightListener(drone):
 
     while True:
         if len(long) % 10 == 0:
-
             gmap3.scatter(lat, long, '#FF0000',size = 40, marker = False )
             gmap3.plot(lat, long, 'cornflowerblue', edge_width = 2.5)
             gmap3.draw( "/home/drone/Desktop//map13.html" )
