@@ -28,10 +28,10 @@ def save_csv():
     writer.writerows(rows)
     f.close()
     
-def run_drone(lat, long):
+def run_drone():
     global prev, id, rows
-    #lat = random.uniform(35.9, 36.1)
-    #long = random.uniform(-78.9, -79.1)
+    lat = random.uniform(35.9, 36.1)
+    long = random.uniform(-78.9, -79.1)
     rows.append([id, lat, long])
     marker = map_widget.set_marker(lat, long, text=str("marker") + str(id))
 
