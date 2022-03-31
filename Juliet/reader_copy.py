@@ -26,10 +26,12 @@ id = 1
 rows = []
 prev = None
 last_entry = 0
+prev_long = 0
+prev_lat = 0
+
 base_path = os.getcwd()
 original_path = base_path + "/CSVFILE.csv"
-
-headersCSV = ['Longitude','Latitude']  
+headersCSV = ['Longitude','Latitude']   
 dict={'Longitude':'','Latitude':''}
 tags=[]
 all_markers = {}
@@ -63,8 +65,6 @@ def save_csv():
     # Confirm save
     open_save_csv_popup(folder_name)
 
-
-
 def clear_csv():
     global base_path, original_path, prev, id, rows, last_entry
     f = open(original_path, "w+")
@@ -80,17 +80,22 @@ def clear_map():
       table.delete(item)
     map_widget.canvas_marker_list.clear()
     map_widget.canvas_path_list.clear()
+    all_markers.clear()
 
 def run_drone():
-    global prev, id, rows, last_entry
+    global prev, id, rows, last_entry, prev_long, prev_lat
     with open('CSVFILE.csv') as fd:
         reader=csv.reader(fd)
         interestingrows = list(reader)
         for index in range(last_entry, len(interestingrows)):
-            lat = float(interestingrows[index][0])
-            long = float(interestingrows[index][1])
-            
+            long = float(interestingrows[index][0])
+            lat = float(interestingrows[index][1])
+            if (abs(prev_long - long) < 0.00005 and abs(prev_lat - lat) < 0.00005):
+                print("skipping")
+                continue            
             marker = map_widget.set_marker(lat, long, text=str(id))
+            prev_long = long
+            prev_lat = lat
             all_markers[id] = marker
 
             if (prev is not None):
@@ -200,7 +205,7 @@ table.pack(side=TOP,expand=True)
 
 def task():
     run_drone()
-    root_tk.after(2000, task)  # reschedule event in 2 seconds
+    root_tk.after(500, task)  # reschedule event in 2 seconds
 
-root_tk.after(2000, task)
+root_tk.after(500, task)
 root_tk.mainloop()

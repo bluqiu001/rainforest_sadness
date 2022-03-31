@@ -3,7 +3,7 @@ from csv import DictWriter
 import time
 import random
 
-headersCSV = ['Latitude','Longitude']  
+headersCSV = ['Longitude','Latitude']  
 dict={'Longitude':'','Latitude':''}
 
 def add_value(): 
