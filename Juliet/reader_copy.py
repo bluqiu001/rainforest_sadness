@@ -31,14 +31,39 @@ original_path = base_path + "/CSVFILE.csv"
 
 headersCSV = ['Longitude','Latitude']  
 dict={'Longitude':'','Latitude':''}
+tags=[]
+all_markers = {}
 
 def save_csv():
-    global base_path, original_path
+    global tags, base_path, original_path
     now = datetime.now()
-    dt_string = "Flight on " + now.strftime("%b-%m-%Y %H:%M:%S") + ".csv"
-    new_path = base_path + "/" + dt_string
+    # Create new folder to hold flight
+    folder_name = "Flight on " + now.strftime("%b-%m-%Y %H:%M:%S")
+    folder_string = base_path + "/" + folder_name
+    os.mkdir(folder_string)
+
+    # Copy CSVFile to its own coodinates
+    dt_string = "Coordinates.csv"
+    new_path = folder_string + "/" + dt_string
     shutil.copyfile(original_path, new_path)
-    open_save_csv_popup(dt_string)
+
+    # Copy tagged locations to a csv
+    tags_dict={'Longitude':'','Latitude':''}
+    for i in tags:
+        # tags_dict['Longitude'] = all_markers[i].long
+        # tags_dict['Latitude'] = all_markers[i].lat
+        tags_dict['Longitude'] = str(all_markers[i].position[1])
+        tags_dict['Latitude'] = str(all_markers[i].position[0])
+        with open(folder_string + '/Tags.csv', 'a', newline='') as f_object:
+                dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
+                # Pass the data in the dictionary as an argument into the writerow() function
+                dictwriter_object.writerow(tags_dict)
+                # Close the file object
+                f_object.close()
+    # Confirm save
+    open_save_csv_popup(folder_name)
+
+
 
 def clear_csv():
     global base_path, original_path, prev, id, rows, last_entry
@@ -65,7 +90,8 @@ def run_drone():
             lat = float(interestingrows[index][0])
             long = float(interestingrows[index][1])
             
-            marker = map_widget.set_marker(lat, long, text=str("marker") + str(id))
+            marker = map_widget.set_marker(lat, long, text=str(id))
+            all_markers[id] = marker
 
             if (prev is not None):
                 path_1 = map_widget.set_path([marker.position, prev.position])
@@ -89,7 +115,7 @@ def open_save_csv_popup(dt_string):
     pop.geometry("450x150")
     pop.config(bg="white")
 
-    info = "CSV has been saved!\n Filename: " + dt_string
+    info = "CSV has been saved!\n Folder: " + dt_string
 
     pop_label = Label(pop, text=info)
     pop_label.pack(pady=10)
@@ -125,7 +151,7 @@ def tag_marker_popup():
     my_frame = Frame(pop)
     my_frame.pack(pady=5)
 
-    ok = Button(my_frame, text="Save Marker", command=lambda: tag_marker(pop_input.get()))
+    ok = Button(my_frame, text="Tag Marker", command=lambda: tag_marker(pop_input.get()))
     ok.grid(row=0, column=1, padx=10)
 
     pop_input = Entry(pop)
@@ -133,8 +159,12 @@ def tag_marker_popup():
 
 
 def tag_marker(pop_input):
-    id = int(pop_input)
-    print(id)
+    global id, tags
+    pop_id = int(pop_input)
+    if (0 < pop_id <= (id-1)) and tags.count(pop_id) == 0:
+        tags.append(pop_id)
+        all_markers[pop_id].text = str(pop_id) + " : tagged"
+
     pop.destroy()
 
 frame = Frame(root_tk)
