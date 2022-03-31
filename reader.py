@@ -1,3 +1,4 @@
+from re import L
 import tkinter
 from tkinter import *
 from  tkinter import ttk
@@ -20,7 +21,8 @@ id = 1
 rows = []
 prev = None
 last_entry = 0
-
+prev_long = 0
+prev_lat = 0
 def save_csv():
     print("csv")
     f = open('test.csv', 'w')
@@ -30,7 +32,7 @@ def save_csv():
     f.close()
     
 def run_drone():
-    global prev, id, rows, last_entry
+    global prev, id, rows, last_entry, prev_long, prev_lat
     # lat = random.uniform(35.9, 36.1)
     # long = random.uniform(-78.9, -79.1)
     # rows.append([id, lat, long])
@@ -39,11 +41,14 @@ def run_drone():
         # interestingrows=[row for idx, row in enumerate(reader) if idx == last_entry]
         interestingrows = list(reader)
         for index in range(last_entry, len(interestingrows)):
-            lat = float(interestingrows[index][0])
-            long = float(interestingrows[index][1])
-            
+            long = float(interestingrows[index][0])
+            lat = float(interestingrows[index][1])
+            if (abs(prev_long - long) < 0.00005 and abs(prev_lat - lat) < 0.00005):
+                print("skipping")
+                continue
             marker = map_widget.set_marker(lat, long, text=str("marker") + str(id))
-
+            prev_long = long
+            prev_lat = lat
             if (prev is not None):
                 path_1 = map_widget.set_path([marker.position, prev.position])
             table.insert(parent='',index='end',iid=id,text='',
@@ -81,7 +86,7 @@ table.pack(side=TOP,expand=True)
 
 def task():
     run_drone()
-    root_tk.after(2000, task)  # reschedule event in 2 seconds
+    root_tk.after(500, task)  # reschedule event in 2 seconds
 
-root_tk.after(2000, task)
+root_tk.after(500, task)
 root_tk.mainloop()

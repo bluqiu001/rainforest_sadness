@@ -62,12 +62,14 @@ class FlightListener(olympe.EventListener):
         dict["Longitude"] = str(event.args['longitude'])
         
         print(time.time())
-        with open('CSVFILE.csv', 'a', newline='') as f_object:
-            dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
-            # Pass the data in the dictionary as an argument into the writerow() function
-            dictwriter_object.writerow(dict)
-            # Close the file object
-            f_object.close()
+        if (event.args['latitude'] < 200):
+            with open('CSVFILE.csv', 'a', newline='') as f_object:
+                dictwriter_object = DictWriter(f_object, fieldnames=headersCSV)
+                # Pass the data in the dictionary as an argument into the writerow() function
+                dictwriter_object.writerow(dict)
+                # Close the file object
+                print("appending to CSV")
+                f_object.close()
         # f = open('data.csv', 'w')
         # f.write(str(event.args['latitude']))
         # f.write(",")
