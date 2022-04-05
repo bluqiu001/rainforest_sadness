@@ -162,7 +162,6 @@ def tag_marker_popup():
     pop_input = Entry(pop)
     pop_input.pack()
 
-
 def tag_marker(pop_input):
     global id, tags
     pop_id = int(pop_input)
